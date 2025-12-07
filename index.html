@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nextbike Olomouc – Live Station Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <h1>Nextbike – Olomouc Live Dashboard</h1>
+    <p class="subtitle">
+      Click a station on the map to see details, stats & session history
+    </p>
+  </header>
+
+  <main class="layout">
+    <section class="left-panel">
+      <div id="map"></div>
+    </section>
+
+    <section class="right-panel">
+      <section id="current-status" class="card">
+        <h2>Selected station – current status</h2>
+        <p><strong>Name:</strong> <span id="station-name">Nothing selected</span></p>
+        <p><strong>Bikes:</strong> <span id="bikes-now">–</span></p>
+        <p><strong>Docks:</strong> <span id="docks-now">–</span></p>
+        <p><strong>Fullness:</strong> <span id="fullness-now">–</span></p>
+        <p><strong>Last update:</strong> <span id="updated-at">–</span></p>
+        <p id="status-message" class="status-message">
+          Click any station on the map to view live data.
+        </p>
+      </section>
+
+      <section id="stats-panel" class="card">
+        <h2>Session stats (selected station)</h2>
+        <div class="stats-grid">
+          <div>
+            <h3>Min bikes</h3>
+            <p id="min-bikes">–</p>
+          </div>
+          <div>
+            <h3>Max bikes</h3>
+            <p id="max-bikes">–</p>
+          </div>
+          <div>
+            <h3>Avg bikes</h3>
+            <p id="avg-bikes">–</p>
+          </div>
+          <div>
+            <h3>Avg fullness</h3>
+            <p id="avg-fullness">–</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="history" class="card">
+        <h2>Session history (bikes)</h2>
+        <canvas id="bikes-chart" height="180"></canvas>
+      </section>
+    </section>
+  </main>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <!-- App -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
