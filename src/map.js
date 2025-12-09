@@ -47,20 +47,37 @@ function initMap(onStationClick) {
     CONFIG.map.zoom
   );
 
-  L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-      maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-    }
-  ).addTo(mapInstance);
+  // --- Basemaps ---
+  const baseMaps = {
+    //"OSM": L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    //  maxZoom: 19,
+    //  attribution: '&copy; OSM'
+    //}),
+    "CyclOSM": L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
+	    maxZoom: 20,
+	    attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }),
+    "Jawg Matrix": L.tileLayer(
+  "https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token=ifkJibgtQCUvnN431uaaxWnxzBuuuMGFed6OVyzYpFJEf02yYsyTC4ZhzopqMLOn",{
+      attribution:'<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      minZoom: 0,
+      maxZoom: 22
+  })
+  };
 
+  // --- General basemap ---
+  baseMaps["CyclOSM"].addTo(mapInstance);
+
+  // --- Layer control  ---
+  L.control.layers(baseMaps).addTo(mapInstance);
+
+  // --- Marker layer ---
   markersLayer = L.layerGroup().addTo(mapInstance);
 
-  // Save callback for later
+  // callback saving
   mapInstance._onStationClick = onStationClick;
 }
+
 
 function updateMapMarkers() {
   if (!mapInstance || !markersLayer) return;
