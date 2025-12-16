@@ -18,24 +18,19 @@ function getBikeClass(bikes, minBikes, maxBikes) {
 }
 
 //Colour ramp by class (0 = low, 9 = high).
-
+// 0 = yellow (low), 9 = red (high)
 function colorForClass(cls) {
   const t = cls / 9; // 0–1
+  const start = { r: 252, g: 218, b: 72 }; // yellow
+  const end = { r: 255, g: 0, b: 0 };     // red
 
-  if (t < 0.5) {
-    const u = t / 0.5;
-    const r = Math.round(0 + u * 255);
-    const g = Math.round(128 + u * 127);
-    const b = 255;
-    return `rgb(${r},${g},${b})`;
-  } else {
-    const u = (t - 0.5) / 0.5;
-    const r = 255;
-    const g = Math.round(255 - u * 255);
-    const b = 0;
-    return `rgb(${r},${g},${b})`;
-  }
+  const r = Math.round(start.r + t * (end.r - start.r));
+  const g = Math.round(start.g + t * (end.g - start.g));
+  const b = Math.round(start.b + t * (end.b - start.b));
+
+  return `rgb(${r},${g},${b})`;
 }
+
 
 //Radius ramp by class (0 = smallest, 9 = largest).
 
@@ -54,6 +49,14 @@ function initMap(onStationHover, onInfoClick) {
 
   // Basemaps
   const baseMaps = {
+        "Jawg Matrix": L.tileLayer(
+      "https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token=ifkJibgtQCUvnN431uaaxWnxzBuuuMGFed6OVyzYpFJEf02yYsyTC4ZhzopqMLOn",
+      {
+        attribution: "© Jawg Maps © OpenStreetMap contributors",
+        minZoom: 0,
+        maxZoom: 22
+      }
+    ),
     CyclOSM: L.tileLayer(
       "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
       {
@@ -61,18 +64,10 @@ function initMap(onStationHover, onInfoClick) {
         attribution:
           'CyclOSM | Map data: © OpenStreetMap contributors'
       }
-    ),
-    "Jawg Matrix": L.tileLayer(
-      "https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token=ifkJibgtQCUvnN431uaaxWnxzBuuuMGFed6OVyzYpFJEf02yYsyTC4ZhzopqMLOn",
-      {
-        attribution: "© Jawg Maps © OpenStreetMap contributors",
-        minZoom: 0,
-        maxZoom: 22
-      }
     )
   };
 
-  baseMaps.CyclOSM.addTo(mapInstance);
+  baseMaps["Jawg Matrix"].addTo(mapInstance);
   const layerControl = L.control.layers(baseMaps).addTo(mapInstance);
 
   markersLayer = L.layerGroup().addTo(mapInstance);
@@ -137,7 +132,7 @@ function updateMapMarkers() {
       marker = L.circleMarker([st.lat, st.lon], {
         radius,
         color: "#111",
-        weight: 1,
+        weight: 0,
         fillColor: color,
         fillOpacity: 0.9
       });
