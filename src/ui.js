@@ -1,61 +1,36 @@
-import { getHistoryForSelected } from "./state.js";
-
-function updateCurrentStatus(station) {
-  const nameEl = document.getElementById("station-name");
-  const bikesEl = document.getElementById("bikes-now");
-  const docksEl = document.getElementById("docks-now");
-  const fullEl = document.getElementById("fullness-now");
-  const updatedEl = document.getElementById("updated-at");
+function updateHeaderStation(station) {
+  const subtitleEl = document.getElementById("subtitle");
+  if (!subtitleEl) return;
 
   if (!station) {
-    nameEl.textContent = "Nothing selected";
-    bikesEl.textContent = "–";
-    docksEl.textContent = "–";
-    fullEl.textContent = "–";
-    updatedEl.textContent = "–";
+    // no station hovered – show default help text
+    subtitleEl.textContent = "Hover over a station to see the number of bikes";
     return;
   }
 
-  nameEl.textContent = station.name;
-  bikesEl.textContent = station.bikesAvailable;
-  docksEl.textContent = station.docksAvailable;
-  fullEl.textContent = `${Math.round(station.fullness * 100)} %`;
-  updatedEl.textContent = station.timestamp.toLocaleTimeString();
+  const bikes =
+    typeof station.bikesAvailable === "number"
+      ? station.bikesAvailable
+      : "?";
+
+  subtitleEl.textContent = `${station.name} (bikes: ${bikes})`;
 }
 
-function updateStatusMessage(msg) {
-  const el = document.getElementById("status-message");
-  el.textContent = msg || "";
+function initInfoOverlay() {
+  const overlay = document.getElementById("info-overlay");
+  const closeBtn = document.getElementById("info-close");
+
+  if (!overlay || !closeBtn) return;
+
+  closeBtn.addEventListener("click", () => {
+    overlay.classList.add("hidden");
+  });
 }
 
-function updateStatsPanel() {
-  const history = getHistoryForSelected();
-  const minEl = document.getElementById("min-bikes");
-  const maxEl = document.getElementById("max-bikes");
-  const avgEl = document.getElementById("avg-bikes");
-  const avgFullEl = document.getElementById("avg-fullness");
-
-  if (!history.length) {
-    minEl.textContent = "–";
-    maxEl.textContent = "–";
-    avgEl.textContent = "–";
-    avgFullEl.textContent = "–";
-    return;
-  }
-
-  const bikes = history.map((h) => h.bikesAvailable);
-  const fullness = history.map((h) => h.fullness);
-
-  const minB = Math.min(...bikes);
-  const maxB = Math.max(...bikes);
-  const avgB = bikes.reduce((a, b) => a + b, 0) / bikes.length;
-  const avgF =
-    fullness.reduce((a, b) => a + b, 0) / fullness.length;
-
-  minEl.textContent = String(minB);
-  maxEl.textContent = String(maxB);
-  avgEl.textContent = avgB.toFixed(1);
-  avgFullEl.textContent = `${(avgF * 100).toFixed(1)} %`;
+function showInfoOverlay() {
+  const overlay = document.getElementById("info-overlay");
+  if (!overlay) return;
+  overlay.classList.remove("hidden");
 }
 
-export { updateCurrentStatus, updateStatusMessage, updateStatsPanel };
+export { updateHeaderStation, initInfoOverlay, showInfoOverlay };

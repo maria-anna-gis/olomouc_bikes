@@ -1,4 +1,3 @@
-// src/api.js
 import { CONFIG } from "./config.js";
 
 /**
@@ -12,39 +11,14 @@ async function fetchJson(url) {
   return res.json();
 }
 
-/**
- * Convert any value to a non-negative integer (or 0).
- */
+//Convert any value to a non-negative integer (or 0).
+
 function toInt(v) {
   const n = parseInt(v, 10);
   return Number.isNaN(n) || n < 0 ? 0 : n;
 }
 
-/**
- * Fetch all Nextbike stations in CZ around Olomouc using the "maps" feed.
- *
- * We call:
- *   https://api.nextbike.net/maps/nextbike-live.json?countries=CZ&lat=...&lng=...&distance=...
- *
- * Response structure:
- *   {
- *     countries: [
- *       {
- *         cities: [
- *           {
- *             uid, name, ...
- *             places: [
- *               {
- *                 uid, number, name, lat, lng,
- *                 bikes, bike_racks, free_racks, ...
- *               }
- *             ]
- *           }
- *         ]
- *       }
- *     ]
- *   }
- */
+//Fetch all Nextbike stations in CZ around Olomouc using the "maps" feed
 async function fetchStations() {
   const { apiBaseUrl, map, searchRadiusMeters, bbox } = CONFIG;
 
@@ -70,7 +44,7 @@ async function fetchStations() {
     cities.forEach((city) => {
       const places = city.places || [];
       places.forEach((place) => {
-        // Basic sanity checks on coordinates
+        // skip invalid coords
         if (
           typeof place.lat !== "number" ||
           typeof place.lng !== "number"
@@ -78,7 +52,7 @@ async function fetchStations() {
           return;
         }
 
-        // Filter to Olomouc bbox (adjust in CONFIG if needed)
+        // filter to Olomouc bbox
         if (
           place.lat < bbox.minLat ||
           place.lat > bbox.maxLat ||
@@ -88,29 +62,10 @@ async function fetchStations() {
           return;
         }
 
-        // ---- Bikes ----
         const bikes = toInt(place.bikes);
 
-        // ---- Capacity ----
-        let capacity = toInt(place.bike_racks);
-
-        // If bike_racks missing/zero, fall back to bikes + free_racks
-        if (!capacity) {
-          const freeRacksRaw = toInt(place.free_racks);
-          capacity = bikes + freeRacksRaw;
-        }
-
-        // Safety net: avoid 0 capacity or capacity < bikes
-        if (!capacity || capacity < bikes) {
-          capacity = Math.max(bikes, 1);
-        }
-
-        // ---- Docks & fullness ----
-        const docksAvailable = Math.max(0, capacity - bikes);
-        const fullness = capacity > 0 ? bikes / capacity : 0;
-
         stations.push({
-          id: place.uid, // Nextbike station UID
+          id: place.uid,
           number: place.number,
           name: place.name,
           cityUid: city.uid,
@@ -118,21 +73,15 @@ async function fetchStations() {
           lat: place.lat,
           lon: place.lng,
           bikesAvailable: bikes,
-          docksAvailable,
-          capacity,
-          fullness,
           timestamp: now,
-          // expose raw place in case you want to inspect it in dev tools
           raw: place
         });
       });
     });
   });
 
-  // Debug: log one sample station so you can inspect raw fields
   if (stations.length > 0) {
-    console.log("Sample station object:", stations[0]);
-    console.log("Raw place from API:", stations[0].raw);
+    console.log("Sample station:", stations[0]);
   } else {
     console.warn("No stations found in bbox – check CONFIG.bbox.");
   }

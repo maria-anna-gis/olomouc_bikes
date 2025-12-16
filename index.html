@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Nextbike Olomouc – Live Station Dashboard</title>
+  <title>Nextbike Olomouc – Live Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Khand:wght@700&display=swap" rel="stylesheet">
-  <link href="https://fonts.cdnfonts.com/css/supreme" rel="stylesheet">
 
-
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Khand:wght@700&display=swap"
+    rel="stylesheet"
+  />
+  <link href="https://fonts.cdnfonts.com/css/supreme" rel="stylesheet" />
 
   <!-- Leaflet CSS -->
   <link
@@ -17,65 +20,53 @@
     crossorigin=""
   />
 
-  <!-- Custom styles -->
+  <!-- App styles -->
   <link rel="stylesheet" href="assets/css/style.css" />
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <header class="header">
-    <h1>Nextbike – Olomouc Live Dashboard</h1>
-    <p class="subtitle">
-      Click a station on the map to see details, stats & session history
-    </p>
+    <div class="header-left">
+      <h1>Nextbike – Olomouc Live Dashboard</h1>
+    </div>
+    <div class="header-center">
+      <span id="subtitle" class="subtitle">
+        Hover over a station to see the number of bikes
+      </span>
+    </div>
   </header>
 
-  <main class="layout">
-    <section class="left-panel">
-      <div id="map"></div>
-    </section>
+  <!-- Intro / info overlay -->
+  <div id="info-overlay" class="info-overlay">
+    <div class="info-content">
+      <h2>About this map</h2>
+      <p>
+        This is a live view of Nextbike stations in Olomouc, Czech Republic.
+        The circle size and colour show relative numbers of bikes between all stations.
+      </p>
+      <ul>
+        <li>
+          <strong>Data source:</strong>
+          <a
+            href="https://github.com/nextbike/api-doc"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Nextbike API documentation
+          </a>
+        </li>
+        <li><strong>Refresh:</strong> approximately once per minute</li>
+        <li><strong>Interaction:</strong> hover over a station to see its current bike count</li>
+      </ul>
+      <p class="info-note">
+        This is an experimental GIS project for exploring bike-share patterns in Olomouc.
+      </p>
+      <button id="info-close" class="info-close-btn">Got it</button>
+    </div>
+  </div>
 
-    <section class="right-panel">
-      <section id="current-status" class="card">
-        <h2>Selected station – current status</h2>
-        <p><strong>Name:</strong> <span id="station-name">Nothing selected</span></p>
-        <p><strong>Bikes:</strong> <span id="bikes-now">–</span></p>
-        <p><strong>Docks:</strong> <span id="docks-now">–</span></p>
-        <p><strong>Fullness:</strong> <span id="fullness-now">–</span></p>
-        <p><strong>Last update:</strong> <span id="updated-at">–</span></p>
-        <p id="status-message" class="status-message">
-          Click any station on the map to view live data.
-        </p>
-      </section>
 
-      <section id="stats-panel" class="card">
-        <h2>Session stats (selected station)</h2>
-        <div class="stats-grid">
-          <div>
-            <h3>Min bikes</h3>
-            <p id="min-bikes">–</p>
-          </div>
-          <div>
-            <h3>Max bikes</h3>
-            <p id="max-bikes">–</p>
-          </div>
-          <div>
-            <h3>Avg bikes</h3>
-            <p id="avg-bikes">–</p>
-          </div>
-          <div>
-            <h3>Avg fullness</h3>
-            <p id="avg-fullness">–</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="history" class="card">
-        <h2>Session history (bikes)</h2>
-        <canvas id="bikes-chart" height="180"></canvas>
-      </section>
-    </section>
+  <main class="map-wrapper">
+    <div id="map"></div>
   </main>
 
   <!-- Leaflet JS -->
@@ -85,7 +76,7 @@
     crossorigin=""
   ></script>
 
-  <!-- App -->
+  <!-- App JS -->
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

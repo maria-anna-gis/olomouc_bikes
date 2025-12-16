@@ -5,79 +5,104 @@ let mapInstance = null;
 let markersLayer = null;
 const markerById = new Map();
 
-/**
- * Color by fullness:
- * 0   -> blue-ish (empty)
- * 0.5 -> yellow-ish
- * 1   -> red (full)
- */
-function colorForFullness(fullness) {
-  const f = Math.max(0, Math.min(1, fullness));
+//10-class classification based on bikes between minBikes and maxBikes. Returns integer 0–9.
+function getBikeClass(bikes, minBikes, maxBikes) {
+  if (maxBikes <= minBikes) {
+    return bikes > 0 ? 9 : 0;
+  }
+  const ratio = (bikes - minBikes) / (maxBikes - minBikes); // 0–1
+  let cls = Math.floor(ratio * 10); // 0–10
+  if (cls > 9) cls = 9;
+  if (cls < 0) cls = 0;
+  return cls;
+}
 
-  if (f < 0.5) {
-    // blue to yellow
-    const t = f / 0.5;
-    const r = Math.round(0 + t * 255);
-    const g = Math.round(128 + t * 127);
+//Colour ramp by class (0 = low, 9 = high).
+
+function colorForClass(cls) {
+  const t = cls / 9; // 0–1
+
+  if (t < 0.5) {
+    const u = t / 0.5;
+    const r = Math.round(0 + u * 255);
+    const g = Math.round(128 + u * 127);
     const b = 255;
     return `rgb(${r},${g},${b})`;
   } else {
-    // yellow to red
-    const t = (f - 0.5) / 0.5;
+    const u = (t - 0.5) / 0.5;
     const r = 255;
-    const g = Math.round(255 - t * 255);
+    const g = Math.round(255 - u * 255);
     const b = 0;
     return `rgb(${r},${g},${b})`;
   }
 }
 
-/**
- * Marker radius scaled by capacity & fullness.
- */
-function radiusForStation(st) {
-  const base = 6;
-  const capFactor = Math.sqrt(st.capacity || 1);
-  const fullnessFactor = 4 + st.fullness * 6;
-  return base + capFactor + fullnessFactor;
+//Radius ramp by class (0 = smallest, 9 = largest).
+
+function radiusForClass(cls) {
+  const minR = 4;
+  const maxR = 22;
+  const t = cls / 9; // 0–1
+  return minR + t * (maxR - minR);
 }
 
-function initMap(onStationClick) {
+function initMap(onStationHover, onInfoClick) {
   mapInstance = L.map("map").setView(
     CONFIG.map.center,
     CONFIG.map.zoom
   );
 
-  // --- Basemaps ---
+  // Basemaps
   const baseMaps = {
-    //"OSM": L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    //  maxZoom: 19,
-    //  attribution: '&copy; OSM'
-    //}),
-    "CyclOSM": L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
-	    maxZoom: 20,
-	    attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }),
+    CyclOSM: L.tileLayer(
+      "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
+      {
+        maxZoom: 20,
+        attribution:
+          'CyclOSM | Map data: © OpenStreetMap contributors'
+      }
+    ),
     "Jawg Matrix": L.tileLayer(
-  "https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token=ifkJibgtQCUvnN431uaaxWnxzBuuuMGFed6OVyzYpFJEf02yYsyTC4ZhzopqMLOn",{
-      attribution:'<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      minZoom: 0,
-      maxZoom: 22
-  })
+      "https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token=ifkJibgtQCUvnN431uaaxWnxzBuuuMGFed6OVyzYpFJEf02yYsyTC4ZhzopqMLOn",
+      {
+        attribution: "© Jawg Maps © OpenStreetMap contributors",
+        minZoom: 0,
+        maxZoom: 22
+      }
+    )
   };
 
-  // --- General basemap ---
-  baseMaps["CyclOSM"].addTo(mapInstance);
+  baseMaps.CyclOSM.addTo(mapInstance);
+  const layerControl = L.control.layers(baseMaps).addTo(mapInstance);
 
-  // --- Layer control  ---
-  L.control.layers(baseMaps).addTo(mapInstance);
-
-  // --- Marker layer ---
   markersLayer = L.layerGroup().addTo(mapInstance);
 
-  // callback saving
-  mapInstance._onStationClick = onStationClick;
-}
+  // store hover callback
+  mapInstance._onStationHover = onStationHover;
 
+  // Info button control (under layers)
+  const infoControl = L.control({ position: "topright" });
+
+  infoControl.onAdd = function () {
+    const div = L.DomUtil.create(
+      "div",
+      "leaflet-control leaflet-bar leaflet-control-info"
+    );
+    div.innerHTML = "i";
+
+    L.DomEvent.disableClickPropagation(div);
+    L.DomEvent.on(div, "click", (e) => {
+      L.DomEvent.stop(e);
+      if (typeof onInfoClick === "function") {
+        onInfoClick();
+      }
+    });
+
+    return div;
+  };
+
+  infoControl.addTo(mapInstance);
+}
 
 function updateMapMarkers() {
   if (!mapInstance || !markersLayer) return;
@@ -85,20 +110,26 @@ function updateMapMarkers() {
   const stations = getSnapshot();
   if (!stations.length) return;
 
+  // min / max bikes for this snapshot
+  let minBikes = Infinity;
+  let maxBikes = -Infinity;
+  stations.forEach((s) => {
+    const b = s.bikesAvailable || 0;
+    if (b < minBikes) minBikes = b;
+    if (b > maxBikes) maxBikes = b;
+  });
+  if (!Number.isFinite(minBikes)) minBikes = 0;
+  if (!Number.isFinite(maxBikes)) maxBikes = 0;
+
   const seen = new Set();
 
   stations.forEach((st) => {
     seen.add(st.id);
 
-    const color = colorForFullness(st.fullness);
-    const radius = radiusForStation(st);
-
-    const popupHtml = `
-      <strong>${st.name}</strong><br/>
-      Bikes: ${st.bikesAvailable}<br/>
-      Docks: ${st.docksAvailable}<br/>
-      Fullness: ${Math.round(st.fullness * 100)} %
-    `;
+    const bikes = st.bikesAvailable || 0;
+    const cls = getBikeClass(bikes, minBikes, maxBikes);
+    const color = colorForClass(cls);
+    const radius = radiusForClass(cls);
 
     let marker = markerById.get(st.id);
 
@@ -109,11 +140,18 @@ function updateMapMarkers() {
         weight: 1,
         fillColor: color,
         fillOpacity: 0.9
-      }).bindPopup(popupHtml);
+      });
 
-      marker.on("click", () => {
-        if (typeof mapInstance._onStationClick === "function") {
-          mapInstance._onStationClick(st.id);
+      // hover: show station in header
+      marker.on("mouseover", () => {
+        if (typeof mapInstance._onStationHover === "function") {
+          mapInstance._onStationHover(st);
+        }
+      });
+
+      marker.on("mouseout", () => {
+        if (typeof mapInstance._onStationHover === "function") {
+          mapInstance._onStationHover(null);
         }
       });
 
@@ -124,12 +162,11 @@ function updateMapMarkers() {
         radius,
         fillColor: color
       });
-      marker.setPopupContent(popupHtml);
       marker.setLatLng([st.lat, st.lon]);
     }
   });
 
-  // Remove markers that disappeared
+  // remove markers for stations that disappeared
   markerById.forEach((marker, id) => {
     if (!seen.has(id)) {
       markersLayer.removeLayer(marker);
