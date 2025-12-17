@@ -47,25 +47,25 @@ function initMap(onStationHover, onInfoClick) {
     CONFIG.map.zoom
   );
 
-  // Basemaps
-  const baseMaps = {
-        "Jawg Matrix": L.tileLayer(
-      "https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token=ifkJibgtQCUvnN431uaaxWnxzBuuuMGFed6OVyzYpFJEf02yYsyTC4ZhzopqMLOn",
-      {
-        attribution: "© Jawg Maps © OpenStreetMap contributors",
-        minZoom: 0,
-        maxZoom: 22
-      }
-    ),
-    CyclOSM: L.tileLayer(
-      "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
-      {
-        maxZoom: 20,
-        attribution:
-          'CyclOSM | Map data: © OpenStreetMap contributors'
-      }
-    )
-  };
+// Basemaps
+const baseMaps = {
+  "Jawg Matrix": L.tileLayer(
+    "https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token=ifkJibgtQCUvnN431uaaxWnxzBuuuMGFed6OVyzYpFJEf02yYsyTC4ZhzopqMLOn",
+    {
+      attribution: "© Jawg Maps © OpenStreetMap contributors",
+      minZoom: 0,
+      maxZoom: 22
+    }
+  ),
+  "Esri World Imagery": L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+      maxZoom: 20
+    }
+  )
+};
+
 
   baseMaps["Jawg Matrix"].addTo(mapInstance);
   const layerControl = L.control.layers(baseMaps).addTo(mapInstance);
@@ -105,7 +105,7 @@ legendControl.onAdd = function () {
   const div = L.DomUtil.create("div", "map-legend");
   div.innerHTML = "<h4>Bikes Available</h4>";
 
-  // 10 osztály
+  // 10 class
   for (let cls = 0; cls <= 9; cls++) {
     const color = colorForClass(cls);
     const radius = radiusForClass(cls);
