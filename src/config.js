@@ -6,7 +6,7 @@ export const CONFIG = {
   // Map center – Olomouc
   map: {
     center: [49.5938, 17.2509],
-    zoom: 13
+    zoom: 14
   },
 
   // Search radius (meters) around map center for stations

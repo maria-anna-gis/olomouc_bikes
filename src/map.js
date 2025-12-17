@@ -97,6 +97,36 @@ function initMap(onStationHover, onInfoClick) {
   };
 
   infoControl.addTo(mapInstance);
+
+  // Legend control
+const legendControl = L.control({ position: "bottomleft" });
+
+legendControl.onAdd = function () {
+  const div = L.DomUtil.create("div", "map-legend");
+  div.innerHTML = "<h4>Bikes Available</h4>";
+
+  // 10 osztály
+  for (let cls = 0; cls <= 9; cls++) {
+    const color = colorForClass(cls);
+    const radius = radiusForClass(cls);
+    div.innerHTML += `
+      <div class="legend-item">
+        <span class="legend-circle" style="
+          background-color: ${color};
+          width: ${radius * 2}px;
+          height: ${radius * 2}px;
+          margin-right: 0.5rem;
+        "></span>
+        ${cls} ${cls === 9 ? "+" : ""}
+      </div>
+    `;
+  }
+
+  return div;
+};
+
+legendControl.addTo(mapInstance);
+
 }
 
 function updateMapMarkers() {
