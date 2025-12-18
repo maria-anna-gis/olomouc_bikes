@@ -66,6 +66,13 @@ const baseMaps = {
   )
 };
 
+  L.control
+    .scale({
+      position: "bottomleft", // or "bottomright"
+      metric: true,           // show metres/kilometres
+      imperial: false         // hide miles/feet
+    })
+    .addTo(mapInstance);
 
   baseMaps["Jawg Matrix"].addTo(mapInstance);
   const layerControl = L.control.layers(baseMaps).addTo(mapInstance);

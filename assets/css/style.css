@@ -188,3 +188,8 @@ body {
   display: inline-block;
   border-radius: 50%;
 }
+
+.leaflet-bottom.leaflet-left .leaflet-control-scale {
+  margin-left: 0.55rem;
+  margin-bottom: 5px;
+}
