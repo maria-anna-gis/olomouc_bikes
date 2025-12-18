@@ -51,6 +51,7 @@ olomouc_bikes/
 ├── assets/
 │   └── css/
 │       └── style.css            # Application styling
+│       └── icons/               # Icons used folder
 ├── src/
 │   ├── api.js                   # Fetches and parses Nextbike live data
 │   ├── config.js                # Map centre, zoom, refresh interval, city config
@@ -79,6 +80,7 @@ olomouc_bikes/
   - Full-height map layout (`.map-wrapper`, `#map`).
   - Styling for the intro/info overlay and its close button.
   - Minor tweaks for Leaflet UI (info button, scale bar, tooltips, etc.).
+  - Icons
 
 ### JavaScript Modules
 
