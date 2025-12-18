@@ -28,9 +28,9 @@ body {
 }
 
 .header-left {
-  display: flex;       /* ikon és h1 egymás mellett */
-  align-items: center; /* középre függőlegesen */
-  gap: 0.5rem;         /* kis távolság az ikon és a szöveg között */
+  display: flex;      
+  align-items: center; 
+  gap: 0.5rem;         
 }
 
 
@@ -102,14 +102,14 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* Info overlay linkek */
+/* Info overlay links */
 .info-content a {
-  color: #4fd1c5;          /* világos türkiz a sötét háttéren */
-  text-decoration: underline; /* opcionális, hogy linkként látszódjon */
+  color: #4fd1c5;          
+  text-decoration: underline; 
 }
 
 .info-content a:hover {
-  color: #34d399;          /* hover szín, világosabb/zöldes árnyalat */
+  color: #34d399;          
 }
 
 
